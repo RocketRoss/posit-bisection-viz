@@ -5,7 +5,8 @@
 
 const label_format = {
     FRACTION: 'fraction',
-    BITSTRING: 'bitstring'
+    BITSTRING: 'bitstring',
+    BOTH: 'both',
 };
 
 const scale_format = {

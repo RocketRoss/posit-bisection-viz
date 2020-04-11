@@ -12,7 +12,7 @@
         <script src="d3.svg.circularbrush.js"></script>
         <script src="brush.js"></script>
         <script src="histogram.js"></script>
-        <title>CSE512 | Well Rounded</title>
+        <title>Posits: Well Rounded</title>
         <!-- Stylesheet from CSE512 faculty -->
         <link rel=StyleSheet HREF="cse512.css" TYPE="text/css" MEDIA="all" >
     </head>
@@ -21,7 +21,10 @@
             <section class="title">
                 <a href="/">Well Rounded: Visualizing Floating Point Representations</a>
             </section>
-
+            <div id="circle-viz" class="visualization" style="text-align:center;">
+                <select class="scaleSelection" style="margin-left: 20px;"></select>
+                <!-- <select class="formatSelection" style="margin-left: 20px;"></select> -->
+            </div>
             <section>
                 <p>
                     <strong>Team Members</strong>: Neil Ryan, Katie Lim, Gus Smith, Dan Petrisko
@@ -91,10 +94,6 @@
                 </p>
             </section>
 
-            <div id="circle-viz" class="visualization" style="text-align:center;">
-                <select class="scaleSelection"></select>
-                <select class="formatSelection"></select>
-            </div>
             <div class="footer">
                 <a href="https://courses.cs.washington.edu/courses/cse512/19sp/">CSE 512 Data Visualization</a>
                 <a href="http://www.washington.edu">University of Washington</a>
@@ -106,7 +105,7 @@
 
      // Posit parameters
      var n = 5; var es = 1;
-     var displayFormat = label_format.BITSTRING;
+     var displayFormat = label_format.BOTH;
      var scaleFormat = scale_format.ORDINAL;
      const nLowerBound = 4; const nUpperBound = 8;
      const esLowerBound = 0;
@@ -120,7 +119,7 @@
      // An assumption I'm making.
      console.assert(width === height);
 
-     var margin = {left : 50, top : 50, right : 50, bottom : 50};
+     var margin = {left : 50, top : 20, right : 50, bottom : 20};
 
      var svg_viz_container = d3.select("#circle-viz").append('svg')
                        .attr('width', margin.left + width + margin.right)

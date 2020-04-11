@@ -20,12 +20,12 @@ function update(width, height, n, es) {
 }
 
 function drawControls(width) {
-    var y_center = calculateYCenter(4);
+    var y_center = calculateYCenter(6);
     var es_slider_start = (width / 2) - (es_slider_width / 2);
     var n_slider_start = (width / 2) - (n_slider_width / 2);
-    var n_slider_y = y_center - 220;
-    var es_slider_y = y_center - 160;
-    var format_button_y = y_center - 80;
+    var n_slider_y = y_center - 220 + 220;
+    var es_slider_y = y_center - 160 + 220;
+    var format_button_y = y_center - 80 + 220;
     var scale_button_y = format_button_y + 35;
     var button_width = 150;
 
@@ -61,6 +61,7 @@ function drawControls(width) {
         .text("ES:");
 
     var format = d3.select(".formatSelection");
+    format.append('option').attr('value', label_format.BOTH).text("Both Values");
     format.append('option').attr('value', label_format.BITSTRING).text("Bitstring Values");
     format.append('option').attr('value', label_format.FRACTION).text("Fraction Values");
     format.on('change', function(event) {
@@ -291,8 +292,10 @@ function drawLabels(posits, width, height, n, es, format, sign) {
     };
 
     var texts = svg_viz_container.selectAll('.'.concat(class_str)).data(posits);
+    
     setTextAttrs(texts.enter().append('text'), params, sign, class_str, format);
     setTextAttrs(texts, params, sign, class_str, format);
+    
     texts.exit().remove();
 }
 
@@ -339,7 +342,8 @@ function setTextAttrs(text_var, params, sign, classString, format) {
                 var frac_str = formatFractionalString(d.bitstring, params.n, params.es);
                 return (is_spaced(d,i) ? frac_str : "");
             })
-    } else {
+    } 
+    else if (format == label_format.BITSTRING) {
         text_var
             .style("fill", COLORS[0])
             .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.sign.join("") : ""))
@@ -352,6 +356,58 @@ function setTextAttrs(text_var, params, sign, classString, format) {
             .append("tspan")
             .style("fill", COLORS[3])
             .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.fraction.join("") : ""));
+    } else {
+        console.log(params)
+        let factors = [0, 0, 0, 0, 1.1, 1, 0.95, 0.88, 0.83]
+        let ems = (factors[params.n]*params.n).toString() + "em"
+        console.log(ems)
+        if (sign == psign.NEGATIVE){
+        text_var
+            .attr("dx", ems)
+            .attr("dy", "0em")
+            .style("fill", "black")
+            .text(function(d, i) {
+                var frac_str = formatFractionalString(d.bitstring, params.n, params.es);
+                return (is_spaced(d,i) ? frac_str : "");
+            })
+            .append("tspan")
+            .attr("dx", "2em")
+            .attr("dy", "0em")
+            .style("fill", COLORS[0])
+            .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.sign.join("") : ""))
+            .append("tspan")
+            .style("fill", COLORS[1])
+            .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.regime.join("") : ""))
+            .append("tspan")
+            .style("fill", COLORS[2])
+            .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.exponent.join("") : ""))
+            .append("tspan")
+            .style("fill", COLORS[3])
+            .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.fraction.join("") : ""))
+        } else {
+        text_var
+            .attr("dx", "-"+ems)
+            .attr("dy", "0em")
+            .style("fill", COLORS[0])
+            .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.sign.join("") : ""))
+            .append("tspan")
+            .style("fill", COLORS[1])
+            .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.regime.join("") : ""))
+            .append("tspan")
+            .style("fill", COLORS[2])
+            .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.exponent.join("") : ""))
+            .append("tspan")
+            .style("fill", COLORS[3])
+            .text((d,i) => (is_spaced(d,i) ? d.rawBitfields.fraction.join("") : ""))
+            .append("tspan")
+            .attr("dx", "2em")
+            .attr("dy", "0em")
+            .style("fill", "black")
+            .text(function(d, i) {
+                var frac_str = formatFractionalString(d.bitstring, params.n, params.es);
+                return (is_spaced(d,i) ? frac_str : "");
+            })
+        }
     }
 }
 
@@ -525,7 +581,8 @@ function drawInfinityDot(x_center, y_center, radius, infinity, format) {
     var circle_top = y_center - radius;
 
 
-    var dotText = (format == label_format.FRACTION) ? "Infinity" : ((d) => d.bitstring.join(""));
+    var dotText = (format == label_format.FRACTION || format == label_format.BOTH) ? "Infinity" : ((d) => d.bitstring.join(""));
+
     infinityDot.enter().append('circle')
         .attr('class', 'infDot')
         .attr('transform', "translate(" + x_center + "," + circle_top + ")")
@@ -551,7 +608,11 @@ function drawInfinityDot(x_center, y_center, radius, infinity, format) {
         .attr('y', y_center - text_radius)
         .attr('font-family', 'sans-serif')
         .attr('text-anchor', 'middle')
-        .text(dotText);
+        .text(dotText)
+        .append("tspan")
+        .attr("dx", "-3em")
+        .attr("dy", "5em")
+        .text((d) => d.bitstring.join(""))
 
     text
         .attr('x', x_center)
@@ -594,7 +655,7 @@ function drawZero(x_center, y_center, radius, zero, format) {
         });
     zeroDot.exit().remove();
 
-    zero_text = (format == label_format.FRACTION) ? "0" : ((d) => d.bitstring.join(""));
+    zero_text = (format == label_format.FRACTION || format == label_format.BOTH) ? "0" : ((d) => d.bitstring.join(""));
 
     text = svg_viz_container.selectAll('.zeroText').data(zero);
     y_coord = y_center + text_radius + 10
@@ -872,14 +933,14 @@ function drawNumberLine(svg, width, height, ...data) {
 function createNumberLine(svg, width, height, n, es) {
     var posits = selectedPosits.map((d) => d.posit);
     posits.sort(positCompareByValue);
-    drawNumberLine(numberLine, 620-40, 300-40,
+    /* drawNumberLine(numberLine, 620-40, 300-40,
                    {
                        name: 'Posits',
                        data: posits,
                        roundingTieFunc: (p1, p2) => calculatePositRoundingTiePoint(p1, p2, n, es),
                        color: 'black'
                    }
-                  );
+                  ); */
 }
 
 /**
